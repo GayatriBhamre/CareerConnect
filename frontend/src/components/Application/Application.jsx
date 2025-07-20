@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { Context } from "../../main";
+import API from "../../api"; // ✅ import the centralized Axios instance
 
 const Application = (props) => {
   const [name, setName] = useState("");
@@ -19,17 +19,14 @@ const Application = (props) => {
   const navigateTo = useNavigate();
   const { id } = useParams();
 
-  // ✅ Load applicant if not passed as prop
   useEffect(() => {
     if (user && user.role === "Employer" && !applicant && id) {
-      axios
-        .get(`http://localhost:4000/api/v1/application/${id}`, { withCredentials: true })
+      API.get(`/api/v1/application/${id}`)
         .then((res) => setApplicant(res.data.applicant))
         .catch((err) => console.error("Error loading applicant:", err));
     }
   }, [applicant, id, user]);
 
-  // ✅ File upload validation
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setFileError("");
@@ -51,7 +48,6 @@ const Application = (props) => {
     setResume(file);
   };
 
-  // ✅ Form submit
   const handleApplication = async (e) => {
     e.preventDefault();
     if (!name || !email || !phone || !address || !coverLetter) {
@@ -74,14 +70,9 @@ const Application = (props) => {
     formData.append("jobId", id);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:4000/api/v1/application/post",
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const { data } = await API.post("/api/v1/application/post", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setName("");
       setEmail("");
       setCoverLetter("");
@@ -99,7 +90,6 @@ const Application = (props) => {
     }
   };
 
-  // ✅ Protect unauthorized access
   useEffect(() => {
     if (!isAuthorized || (user && user.role === "Employer" && !id && !applicant)) {
       navigateTo("/");
@@ -127,69 +117,22 @@ const Application = (props) => {
           <>
             <h3>Application Form</h3>
             <form onSubmit={handleApplication}>
-              <input
-                type="text"
-                placeholder="Your Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <input
-                type="email"
-                placeholder="Your Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <input
-                type="number"
-                placeholder="Your Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Your Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-              />
-              <textarea
-                placeholder="Cover Letter..."
-                value={coverLetter}
-                onChange={(e) => setCoverLetter(e.target.value)}
-                required
-              />
+              <input type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input type="email" placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="number" placeholder="Your Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              <input type="text" placeholder="Your Address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+              <textarea placeholder="Cover Letter..." value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} required />
               <div>
-                <label
-                  style={{ textAlign: "start", display: "block", fontSize: "20px" }}
-                >
+                <label style={{ textAlign: "start", display: "block", fontSize: "20px" }}>
                   Upload Resume
                   <p style={{ color: "red", fontSize: "12px", margin: "5px 0 0 0" }}>
                     (Supported formats: PNG, JPEG, WEBP. Max size: 2MB)
                   </p>
                 </label>
-                <input
-                  type="file"
-                  accept=".png,.jpg,.jpeg,.webp"
-                  onChange={handleFileChange}
-                  style={{ width: "100%" }}
-                />
-                {fileError && (
-                  <p style={{ color: "red", fontSize: "14px", marginTop: "5px" }}>
-                    {fileError}
-                  </p>
-                )}
+                <input type="file" accept=".png,.jpg,.jpeg,.webp" onChange={handleFileChange} style={{ width: "100%" }} />
+                {fileError && <p style={{ color: "red", fontSize: "14px", marginTop: "5px" }}>{fileError}</p>}
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  opacity: loading ? 0.7 : 1,
-                  cursor: loading ? "not-allowed" : "pointer",
-                }}
-              >
+              <button type="submit" disabled={loading} style={{ opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
                 {loading ? "Submitting..." : "Send Application"}
               </button>
             </form>
