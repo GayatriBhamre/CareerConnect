@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { Context } from "../../main";
 
 
-const BACKEND_URL = "https://careerconnect-backend.onrender.com"; 
+const BACKEND_URL = "import.meta.env.VITE_API_URL"; 
 
 const Register = () => {
   const [email, setEmail] = useState("");
