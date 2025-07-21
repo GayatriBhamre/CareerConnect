@@ -9,6 +9,9 @@ import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
+console.log("✅ FRONTEND_URL:", process.env.FRONTEND_URL);
+
+
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

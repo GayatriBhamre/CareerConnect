@@ -14,7 +14,10 @@ const Login = () => {
 
   const { isAuthorized, setIsAuthorized } = useContext(Context);
 
+
   const API = import.meta.env.VITE_API_URL;
+  console.log("API:", API);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
